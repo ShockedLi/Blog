@@ -50,7 +50,19 @@ class Db {
         return $this->pdo->lastInsertId();
     }
 
-    
+    public function update($data) {
+        $sql = $this->_build_sql('update',$data);
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    public function delete() {
+        $sql = $this->_build_sql('delete');
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
 
     public function item() {
         $sql = $this->_build_sql('select').'limit 1';
@@ -91,6 +103,23 @@ class Db {
                 $values[] = is_string($val)? "'".$val."'" : $val;
             }
             $sql .= "(".implode(',',$fields).") values(".implode(',', $values).")";
+            //exit($sql);
+        }
+        if($type == 'delete') {
+            $where = $this->_build_where();
+            $sql = "delete from {$this->table} {$where}";
+            //exit($sql);
+        }
+        if($type == 'update') {
+            $where = $this->_build_where();
+            $str = '';
+            foreach($data as $key => $val) {
+                $val = is_string($val)? "'".$val."'" : $val;
+                $str .= "{$key}={$val},";
+            }
+            $str = rtrim($str,',');
+            $str = $str? " set {$str}" : '';
+            $sql = "update {$this->table} {$str} {$where}";
             //exit($sql);
         }
         return $sql;

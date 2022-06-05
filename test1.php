@@ -14,8 +14,17 @@ echo '<pre>';
 //     print_r($value);
 // }
 
-$data = ['title'=>'逆向'];
-$id = $db->table('cates')->insert($data);
-var_dump($id);
+// 插入
+// $data = ['title'=>'逆向'];
+// $id = $db->table('cates')->insert($data);
+// var_dump($id);
 
+// 删除
+// $res = $db->table('cates')->where('id = 14')->delete();
+// var_dump($res);
+
+// 更新
+$data = ['title'=>'安卓逆向'];
+$res = $db->table('cates')->where(array('id'=>12))->update($data);
+var_dump($res);
 ?>
