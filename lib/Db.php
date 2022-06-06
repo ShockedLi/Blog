@@ -64,6 +64,66 @@ class Db {
         return $stmt->rowCount();
     }
 
+    public function page($page, $pageSize=10, $path='/') {
+        $this->limit = ($page - 1) * $pageSize.', '.$pageSize;
+        $count = $this->count();
+        $data = $this->lists();
+        $pages = $this->_subPages($page, $pageSize, $count, $path);
+        return array('count'=>$count, 'data'=>$data, 'pages'=>$pages);
+    }
+
+    private function _subPages($cur_page, $pageSize, $total, $path) {
+        //$cur_page : 当前页码
+        //$pageSize : 一页最大的数据记录数量
+        //$total : 记录总量
+
+        $symbol = '?';
+        if(strpos($path,'?')>0) {
+            $symbol = '&';
+        }
+
+        //分页数
+        $page_count=ceil($total/$pageSize);
+        if($cur_page>1) {
+            $html="<li><a href='{$path}{$symbol}page=1'>首页</a></li>";
+            $pre_page = $cur_page-1;
+            $html.= "<li><a href='{$path}{$symbol}page={$pre_page}'>上一页</a></li>";
+        }
+       
+        $start = $cur_page > ($page_count-6) ? ($page_count-6): $cur_page;
+        $start = $start - 2;
+        $start = $start<=0?1:$start; //作用总页数少于6的情况
+        $end = ($cur_page+6) > $page_count? $page_count:($cur_page+6);
+        $end = $end - 2;
+        if($cur_page+2>=$end && $page_count > 6) {
+            $start = $start+2;
+        }
+        if(($page_count -$cur_page)<6) {
+            $end = $end +2;
+        }
+        for($i=$start;$i<=$end;$i++) {
+            $html.= $i == $cur_page?"<li class='active'><a>{$i}</a></li>":"<li><a href='{$path}{$symbol}page={$i}'>{$i}</a></li>";
+        }
+
+        if($cur_page<$page_count) {
+            $after_page=$cur_page+1;
+            $html.= "<li><a href='{$path}{$symbol}page={$after_page}'>下一页</a></li>";
+            $html.="<li><a href='{$path}{$symbol}page={$page_count}'>尾页</a></li>";
+        }
+        
+
+        $html='<nav aria-label="Page navigation"><ul class="pagination">'.$html.'</li></ul>';
+        return $html;
+    }
+
+    public function count() {
+        $sql = $this->_build_sql('count');
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $total = $stmt->fetchColumn(0);
+        return $total;
+    }
+
     public function item() {
         $sql = $this->_build_sql('select').'limit 1';
         // exit($sql);
@@ -90,11 +150,20 @@ class Db {
                 $sql .= " order by {$this->order}";
             }
     
-            if($this->limit > 0) {
+            if($this->limit) {
                 $sql .= " limit {$this->limit}";
             }
             //exit($sql);
         }
+
+        if($type == 'count') {
+            $where = $this->_build_where();
+            $field_list = explode(',',$this->field);
+            $field = count($field_list)>1? '*':$this->field;
+            $sql = "select count({$field}) from {$this->table} {$where}";
+            //exit($sql);
+        }
+
         if($type == 'insert') {
             $sql = "insert into {$this->table}";
             $fields = $values = [];

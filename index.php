@@ -74,7 +74,7 @@
 
 <script>
     function login(){
-        // UI.alert({title:"系统消息", msg:"请输入用户名", icon:"ok"});
+        //UI.alert({title:"系统消息", msg:"请输入用户名", icon:"ok"});
         UI.open({title: "登录", url: "./login.php", width: 450,height: 350})
     }
 </script>
