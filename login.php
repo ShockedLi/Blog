@@ -1,6 +1,6 @@
 <?php
 session_start();
-$user = $_SESSION['user'];
+$user = isset($_SESSION['user'])?$_SESSION['user']:false;
 
 ?>
 <!DOCTYPE html>
@@ -20,6 +20,7 @@ $user = $_SESSION['user'];
             text-align: center;
             font-size: 18px;
             color: #666;
+            margin-top: 30px;
         }
         .form {
             margin-top: 50px;

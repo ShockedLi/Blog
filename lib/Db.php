@@ -44,7 +44,7 @@ class Db {
     }
 
     public function insert($data) {
-        $sql = $this->_build_sql('insert',$data);
+        $sql = $this->_build_sql('insert',$data);//exit($sql);
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
         return $this->pdo->lastInsertId();
@@ -168,7 +168,7 @@ class Db {
             $sql = "insert into {$this->table}";
             $fields = $values = [];
             foreach($data as $key => $val) {
-                $fields[] = $key;
+                $fields[] = "`".$key."`";
                 $values[] = is_string($val)? "'".$val."'" : $val;
             }
             $sql .= "(".implode(',',$fields).") values(".implode(',', $values).")";

@@ -1,3 +1,8 @@
+<?php
+session_start();
+$user = isset($_SESSION['user'])?$_SESSION['user']:false;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +28,14 @@
                     </span>
                  </div>
             </div>
+          
             <div class="login-reg">
+                <?php if($user){?>
+                <span><?php echo $user['username']?></span><a href='javascript:;' onclick="logout()">退出</a>
+                <?php }else{?>
                 <button type="button" class="btn btn-success" onclick="login()">登录</button>
-                <button type="button" class="btn btn-warning">发表博客</button>
+                <?php }?>
+                <button type="button" class="btn btn-warning" onclick="add_article()">发表博客</button>
             </div>
         </div>
     </div>
@@ -76,5 +86,23 @@
     function login(){
         //UI.alert({title:"系统消息", msg:"请输入用户名", icon:"ok"});
         UI.open({title: "登录", url: "./login.php", width: 450,height: 350})
+    }
+
+    function logout() {
+        if(!confirm('确定要退出吗？')) {
+            return;
+        }
+        $.get('/Blog/service/logout.php',{},function(res){
+            if(res.code>0){
+				UI.alert({msg:res.msg,icon:'error'});
+			}else{
+				UI.alert({msg:res.msg,icon:'ok'});
+				setTimeout(function(){parent.window.location.reload();},1000);
+			}
+        },'json');
+    }
+
+    function add_article() {
+        UI.open({title: "发表博客", url: "./add_article.php", width: 750,height: 650})
     }
 </script>
